@@ -1,9 +1,10 @@
 # USAGE
 # python sliding_window.py --image images/1.jpg 
-
-from lib.pyimagesearch.nms import non_max_suppression_slow
-from lib.pyimagesearch.helpers import sliding_window
-from imagesearch.imutils import resize
+import sys
+sys.path.append("/home/ubuntu/git/goods-counter/lib/pyimagesearch/")
+from nms import non_max_suppression_slow
+from helpers import sliding_window
+from imutils import resize
 import argparse
 import cv2
 import h5py
@@ -29,7 +30,7 @@ model = model_from_json(open('../model/model_architecture_super_bigpink_more1_ad
 model.load_weights('../model/model_weights_super_bigpink_more1_add0fp2.h5')
 
 detect_list = []
-c = 0
+#c = 0
 # loop
 while winW < image.shape[1] and winH < image.shape[0]:
 	# loop over the sliding window for each windowSize
@@ -65,7 +66,7 @@ while winW < image.shape[1] and winH < image.shape[0]:
 img = image.copy()
 for (x1,y1,x2,y2) in detect_list:
 	cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-cv2.imwrite('images/result/src_image.jpg',img)
+cv2.imwrite('~/dataset/images/result/src_image.jpg',img)
 boundingBoxes = np.array(detect_list)
 print "[x] %d initial bounding boxes" % (len(boundingBoxes))
 pick = non_max_suppression_slow(boundingBoxes, 0.3)
@@ -73,5 +74,5 @@ print "[x] after applying non-maximum, %d bounding boxes" % (len(pick))
 for (startX, startY, endX, endY) in pick:
 	cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-cv2.imwrite('images/result/'+args["image"].split('/')[1],image)
+cv2.imwrite('~/dataset/images/result/'+args["image"].split('/')[1],image)
 cv2.waitKey(0)
