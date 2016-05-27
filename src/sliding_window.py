@@ -1,9 +1,9 @@
 # USAGE
 # python sliding_window.py --image images/1.jpg 
 
-from pyimagesearch.nms import non_max_suppression_slow
-from pyimagesearch.helpers import sliding_window
-from pyimagesearch.imutils import resize
+from lib.pyimagesearch.nms import non_max_suppression_slow
+from lib.pyimagesearch.helpers import sliding_window
+from imagesearch.imutils import resize
 import argparse
 import cv2
 import h5py
@@ -25,8 +25,8 @@ stepsize = 8
 threshold = 0.9
 
 #load model
-model = model_from_json(open('model/model_architecture_super_bigpink_more1_add0fp2.json').read())
-model.load_weights('model/model_weights_super_bigpink_more1_add0fp2.h5')
+model = model_from_json(open('../model/model_architecture_super_bigpink_more1_add0fp2.json').read())
+model.load_weights('../model/model_weights_super_bigpink_more1_add0fp2.h5')
 
 detect_list = []
 c = 0
@@ -53,8 +53,8 @@ while winW < image.shape[1] and winH < image.shape[0]:
 			detect_list.append([x,y,x+winW,y+winH])
 			print x,y,winW,winH
 			print result[0]
-			cv2.imwrite('images/valid/'+str(c)+args["image"].split('/')[1],window)
-			c += 1
+			#cv2.imwrite('images/valid/'+str(c)+args["image"].split('/')[1],window)
+			#c += 1
 
 	winW = int(winW * scale)
 	winH = 2 * winW

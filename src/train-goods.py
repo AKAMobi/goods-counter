@@ -23,7 +23,7 @@ img_rows, img_cols = 64, 32
 img_channels = 3
 		
 #加载数据
-data, label = load_data('./train_bigpink')
+data, label = load_data('/home/ubuntu/dataset/train_bigpink')
 print(data.shape[0], ' samples')
 		
 #X_test, Y_test = load_data('./train')
@@ -97,8 +97,8 @@ with tf.device('/cpu:0'):
 ######################################
 
 json_string = model.to_json()
-open('model/model_architecture_super_bigpink_more1_add0fp2.json','w').write(json_string)
-model.save_weights('model/model_weights_super_bigpink_more1_add0fp2.h5')
+open('../model/model_architecture_super_bigpink_more1_add0fp2.json','w').write(json_string)
+model.save_weights('../model/model_weights_super_bigpink_more1_add0fp2.h5')
 
 #score = model.evaluate(X_test, Y_test, verbose=1)
 #print('Test score:', score[0])
