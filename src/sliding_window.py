@@ -1,7 +1,9 @@
 # USAGE
 # python sliding_window.py --image images/1.jpg 
 import sys
-sys.path.append("/home/ubuntu/git/goods-counter/lib/pyimagesearch/")
+if not "/home/ubuntu/git/goods-counter/lib/pyimagesearch/" in sys.path:
+	sys.path.append("/home/ubuntu/git/goods-counter/lib/pyimagesearch/")
+
 from nms import non_max_suppression_slow
 from helpers import sliding_window
 from imutils import resize
@@ -18,11 +20,11 @@ args = vars(ap.parse_args())
 
 # load the image and define the window width and height
 image = cv2.imread(args["image"])
-image = resize(image,width = 600)
+image = resize(image,width = 900)
 # set parameters
 (winW, winH) = (32,64)
 scale = 2 ** 0.5
-stepsize = 8
+stepsize = 4
 threshold = 0.9
 
 #load model

@@ -23,14 +23,17 @@ img_rows, img_cols = 64, 32
 img_channels = 3
 		
 #加载数据
-data, label = load_data('/home/ubuntu/dataset/train_bigpink')
-print(data.shape[0], ' samples')
+path_positive = '/home/ubuntu/dataset/train_positive'
+path_negative = '/home/ubuntu/dataset/train_negative'
+X_train,Y_train,X_valid,Y_valid,X_test,Y_test = load_data(path_positive,path_negative)
+print(X_train.shape[0], 'training samples')
+print(X_valid.shape[0],'validation samples')
+print(X_test.shape[0],'testing samples')
 		
-#X_test, Y_test = load_data('./train')
-#print(X_test.shape[0], 'test samples')
-#Y_test = np_utils.to_categorical(Y_test, 2)
 #label为0,1两个类别，keras要求格式为binary class matrices,转化一下，调用keras提供的函数
-label = np_utils.to_categorical(label, nb_classes)
+Y_train = np_utils.to_categorical(Y_train, nb_classes)
+Y_valid = np_utils.to_categorical(Y_valid, nb_classes)
+Y_test = np_utils.to_categorical(Y_test, nb_classes)
 
 ###############
 #开始建立CNN模型
@@ -81,25 +84,30 @@ with tf.device('/cpu:0'):
 	##############
 	#开始训练模型
 	##############
-	#使用SGD + momentum
-	#model.compile里的参数loss就是损失函数(目标函数)
+	#lr: float >= 0. Learning rate.
+	#momentum: float >= 0. Parameter updates momentum.
+	#decay: float >= 0. Learning rate decay over each update.
+	#nesterov: boolean. Whether to apply Nesterov momentum.
+	#model.compile里的参数loss就是损失函数(目标函数),binary_crossentropy即为logistic loss
 	sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 	model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
 		
 	#调用fit方法
 	#shuffle=True，数据经过随机打乱
 	#verbose=1，训练过程中输出的信息，1为输出进度条记录
-	#validation_split=0.2，将20%的数据作为验证集
-	model.fit(data, label, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1, validation_split=0.2)
-
+	#validation_data，指定验证集
+	model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1, validation_data=(X_valid,Y_valid)) 
 ######################################
 #保存CNN模型
 ######################################
 
 json_string = model.to_json()
-open('../model/model_architecture_super_bigpink_more1_add0fp2.json','w').write(json_string)
-model.save_weights('../model/model_weights_super_bigpink_more1_add0fp2.h5')
+open('../model/model_architecture.json','w').write(json_string)
+model.save_weights('../model/model_weights.h5')
 
-#score = model.evaluate(X_test, Y_test, verbose=1)
-#print('Test score:', score[0])
-#print('Test accuracy:', score[1])
+#####################################
+#测试CNN模型
+#####################################
+score = model.evaluate(X_test, Y_test, verbose=1)
+print('Test score:', score[0])
+print('Test accuracy:', score[1])
