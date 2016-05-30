@@ -9,7 +9,8 @@ from keras.optimizers import SGD
 from keras.utils import np_utils, generic_utils
 from six.moves import range
 from data import load_data
-import h5py 
+import h5py
+import argparse
 from keras.models import model_from_json
 import tensorflow as tf
 
@@ -21,10 +22,15 @@ nb_epoch = 3
 img_rows, img_cols = 64, 32
 # the images are RGB
 img_channels = 3
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--positive", required=True, help="Path to the positive training set")
+ap.add_argument("--negative", required=True, help="Path to the negative training set")
+args = vars(ap.parse_args())
 		
 #加载数据
-path_positive = '/home/ubuntu/dataset/train_positive'
-path_negative = '/home/ubuntu/dataset/train_negative'
+path_positive = args["positive"]
+path_negative = args["negative"]
 X_train,Y_train,X_valid,Y_valid,X_test,Y_test = load_data(path_positive,path_negative)
 print(X_train.shape[0], 'training samples')
 print(X_valid.shape[0],'validation samples')
@@ -51,7 +57,7 @@ with tf.device('/cpu:0'):
 				dim_ordering='tf'))
 	model.add(Activation('relu'))
 #	model.add(MaxPooling2D(pool_size=(2, 2),dim_ordering='tf'))
-#        model.add(Dropout(0.5))
+        model.add(Dropout(0.5))
 
 	#第二个卷积层，32个卷积核，每个卷积核大小3*3
 	#采用maxpooling,poolsize为（2,2）

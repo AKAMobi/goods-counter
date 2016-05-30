@@ -24,18 +24,19 @@ image = resize(image,width = 900)
 # set parameters
 (winW, winH) = (32,64)
 scale = 2 ** 0.5
-stepsize = 4
+stepsize = 8
 threshold = 0.9
 
 #load model
-model = model_from_json(open('../model/model_architecture_super_bigpink_more1_add0fp2.json').read())
-model.load_weights('../model/model_weights_super_bigpink_more1_add0fp2.h5')
+model = model_from_json(open('../model/model_architecture.json').read())
+model.load_weights('../model/model_weights.h5')
 
 detect_list = []
 #c = 0
 # loop
 while winW < image.shape[1] and winH < image.shape[0]:
 	# loop over the sliding window for each windowSize
+	print 'winW=',winW,'winH=',winH
 	for (x, y, window) in sliding_window(image, stepSize=stepsize, windowSize=(winW, winH)):
 		# if the window does not meet the desired window size, ignore it
 		if window.shape[0] != winH or window.shape[1] != winW:
@@ -61,14 +62,13 @@ while winW < image.shape[1] and winH < image.shape[0]:
 
 	winW = int(winW * scale)
 	winH = 2 * winW
-	print('winW=%d,winH=%d',winW,winH)
 	#if winW > image.shape[1] / 6:
 	#	break
 
 img = image.copy()
 for (x1,y1,x2,y2) in detect_list:
 	cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-cv2.imwrite('~/dataset/images/result/src_image.jpg',img)
+cv2.imwrite('/home/ubuntu/dataset/images/result/src_image.jpg',img)
 boundingBoxes = np.array(detect_list)
 print "[x] %d initial bounding boxes" % (len(boundingBoxes))
 pick = non_max_suppression_slow(boundingBoxes, 0.3)
@@ -76,5 +76,5 @@ print "[x] after applying non-maximum, %d bounding boxes" % (len(pick))
 for (startX, startY, endX, endY) in pick:
 	cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-cv2.imwrite('~/dataset/images/result/'+args["image"].split('/')[1],image)
+cv2.imwrite('/home/ubuntu/dataset/images/result/result.jpg',image)
 cv2.waitKey(0)
