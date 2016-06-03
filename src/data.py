@@ -44,10 +44,13 @@ def load_data(path_positive,path_negative):
                         X_train[num_positive - 2 * (num_positive / 5) + i - 2 * (i/5),:,:,:] = [arr[:,:,0],arr[:,:,1],arr[:,:,2]]
                         Y_train[num_positive - 2 * (num_positive / 5) + i - 2 * (i/5)] = 0
 
-	X_valid = X_valid.reshape(len(X_valid),64,32,3)
-	X_test = X_test.reshape(len(X_test),64,32,3)
-	X_train = X_train.reshape(len(X_train),64,32,3)
-	X_valid /= 255
-	X_test /= 255
-	X_train /= 255
+#	X_valid = X_valid.reshape(len(X_valid),64,32,3)
+#	X_test = X_test.reshape(len(X_test),64,32,3)
+#	X_train = X_train.reshape(len(X_train),64,32,3)
+	X_valid = np.transpose(X_valid / 255, (0, 2, 3, 1))
+	X_test = np.transpose(X_test / 255, (0, 2, 3, 1))
+	X_train = np.transpose(X_train / 255, (0, 2, 3, 1))
+#	X_valid /= 255
+#	X_test /= 255
+#	X_train /= 255
 	return X_train,Y_train,X_valid,Y_valid,X_test,Y_test

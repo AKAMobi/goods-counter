@@ -48,8 +48,9 @@ while winW < image.shape[1] and winH < image.shape[0]:
 		data = np.empty((1,3,64,32),dtype="float32")
 		arr = np.asarray(window_resize,dtype="float32")
 		data[0,:,:,:] = [arr[:,:,0],arr[:,:,1],arr[:,:,2]]
-		data = data.reshape(1,64,32,3)
-       	        data /= 255
+		#data = data.reshape(1,64,32,3)
+       	        #data /= 255
+		data = np.transpose(data / 255, (0, 2, 3, 1))
 		result = model.predict(data, batch_size=1, verbose = 0)
 		#print result
 		#result = model.predict_on_batch(data)

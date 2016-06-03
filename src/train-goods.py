@@ -12,6 +12,7 @@ from data import load_data
 import h5py
 import argparse
 from keras.models import model_from_json
+#from keras.utils.visualize_util import plot
 import tensorflow as tf
 
 batch_size = 64
@@ -53,11 +54,12 @@ with tf.device('/cpu:0'):
 	#dim_ordering为tensorflow
 	model.add(Convolution2D(32, 5, 5, 
 				border_mode='valid',
-        	                input_shape=(img_rows, img_cols, img_channels),
+        	                #input_shape=(img_rows, img_cols, img_channels),
+				input_shape=(X_train.shape[1:]),
 				dim_ordering='tf'))
 	model.add(Activation('relu'))
 #	model.add(MaxPooling2D(pool_size=(2, 2),dim_ordering='tf'))
-        model.add(Dropout(0.5))
+#        model.add(Dropout(0.5))
 
 	#第二个卷积层，32个卷积核，每个卷积核大小3*3
 	#采用maxpooling,poolsize为（2,2）
@@ -97,12 +99,19 @@ with tf.device('/cpu:0'):
 	#model.compile里的参数loss就是损失函数(目标函数),binary_crossentropy即为logistic loss
 	sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 	model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
-		
+
+	# visualize model layout with pydot_ng
+	#plot(model, to_file='../model/model.png', show_shapes=True)	
+	
 	#调用fit方法
 	#shuffle=True，数据经过随机打乱
 	#verbose=1，训练过程中输出的信息，1为输出进度条记录
 	#validation_data，指定验证集
 	model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1, validation_data=(X_valid,Y_valid)) 
+	
+	score = model.evaluate(X_train, Y_train, verbose=1)
+	print('Train loss:', score[0])
+	print('Train accuracy:', score[1])
 ######################################
 #保存CNN模型
 ######################################
