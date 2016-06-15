@@ -65,3 +65,58 @@ def non_max_suppression_slow(boxes, overlapThresh):
 
 	# return only the bounding boxes that were picked
 	return boxes[pick]
+
+def expansion(boundingBoxes):
+	bigRect = []
+
+	x1 = boundingBoxes[:,0]
+	x2 = boundingBoxes[:,2]
+	y1 = boundingBoxes[:,1]
+	y2 = boundingBoxes[:,3]
+
+	width_avg = sum(x2 - x1) / len(boundingBoxes)
+	height_avg = sum(y2 - y1) / len(boundingBoxes)
+#	print width_avg,height_avg
+	idxs_y2 = np.argsort(y2)
+
+	while len(idxs_y2) > 0:
+		pick = []
+		index = []
+		length = len(idxs_y2)
+		pick.append(idxs_y2[0])
+		index.append(0)
+		if(length > 1):
+			for pos in xrange(1, length):
+				pick.append(idxs_y2[pos])
+				index.append(pos)
+				if (y2[idxs_y2[pos]]-(y2[idxs_y2[pos]]-y1[idxs_y2[pos]])/2) - (y2[idxs_y2[pos-1]]-(y2[idxs_y2[pos - 1]]-y1[idxs_y2[pos - 1]])/2) >= 0.8*height_avg:
+					pick.pop()
+					index.pop()
+					break
+		idxs_y2 = np.delete(idxs_y2, index)
+
+		idx_x1 = np.argsort(x1[pick])
+		pick_sort = []
+		for i in range(0,len(pick)):
+			pick_sort.append(pick[idx_x1[i]])
+
+		while len(pick_sort) > 0:
+			pickx = []
+			index = []
+			length = len(pick_sort)
+			pickx.append(pick_sort[0])
+			index.append(0)
+			if(length > 1):
+				for pos in xrange(1, length):
+					pickx.append(pick_sort[pos])
+					index.append(pos)
+					if x1[pick_sort[pos]] - x1[pick_sort[pos - 1]] > 2.5 * width_avg:
+						pickx.pop()
+						index.pop()
+						break
+			pick_sort = np.delete(pick_sort, index)
+
+			if len(pickx) >= 5:
+				for ok in pickx:
+					bigRect.append([x1[ok],y1[ok],x2[ok],y2[ok]])
+	return bigRect
