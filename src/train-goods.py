@@ -21,9 +21,9 @@ batch_size = 100
 #分类个数
 nb_classes = 2
 #the number of times to iterate over the training data arrays
-nb_epoch = 15
+nb_epoch = 50
 #训练CNN的个数
-nb_loop = 50
+nb_loop = 10
 
 # input image dimensions
 img_rows, img_cols = 64, 32
@@ -31,18 +31,16 @@ img_rows, img_cols = 64, 32
 img_channels = 3
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--train1", required=True, help="Path to the positive training set")
-ap.add_argument("--train0", required=True, help="Path to the negative training set")
-ap.add_argument("--test1", required=True, help="Path to the positive testing set")
-ap.add_argument("--test0", required=True, help="Path to the negative testing set")
+ap.add_argument("--positive", required=True, help="Path to the positive training set")
+ap.add_argument("--negative", required=True, help="Path to the negative training set")
 args = vars(ap.parse_args())
 
 #加载数据
-path_positive_train = args["train1"]
-path_negative_train = args["train0"]
-path_positive_valid_test = args["test1"]
-path_negative_valid_test = args["test0"]
-X_train,Y_train,X_valid,Y_valid,X_test,Y_test = load_data(path_positive_train,path_negative_train,path_positive_valid_test,path_negative_valid_test)
+path_positive = args["positive"]
+path_negative = args["negative"]
+#path_positive_valid_test = args["test1"]
+#path_negative_valid_test = args["test0"]
+X_train,Y_train,X_valid,Y_valid,X_test,Y_test = load_data(path_positive,path_negative)
 print(X_train.shape[0], 'training samples')
 print(X_valid.shape[0],'validation samples')
 print(X_test.shape[0],'testing samples')
@@ -85,6 +83,12 @@ for i in range(nb_loop):
     #model.add(MaxPooling2D(pool_size=(2, 2)))
     #model.add(Dropout(0.25))
 
+    #第四个卷积层，64个卷积核，每个卷积核大小3*3
+    #model.add(Convolution2D(64, 3, 3))
+    #model.add(Activation('relu'))
+    #model.add(MaxPooling2D(pool_size=(2, 2)))
+    #model.add(Dropout(0.25))
+
     #全连接层
     model.add(Flatten())
     model.add(Dense(128))
@@ -104,7 +108,7 @@ for i in range(nb_loop):
     #decay: float >= 0. Learning rate decay over each update.
     #nesterov: boolean. Whether to apply Nesterov momentum.
     #model.compile里的参数loss就是损失函数(目标函数),binary_crossentropy即为logistic loss
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
 
@@ -137,7 +141,7 @@ for i in range(nb_loop):
     score = model.evaluate(X_test, Y_test, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    dist[i]=score[1]
+    dist[i]=score[0]
 
 ######################################
 #保存CNN模型
@@ -149,7 +153,7 @@ open(path_save_model+'/model_architecture.json','w').write(json_string)
 ##根据dist.values()做一个排序，选择前5个或10个效果较好的cnn model单独保存,应用于sliding window最后判断
 print(dist)
 import subprocess
-for i in range(5):
-	index = dist.keys()[dist.values().index(max(dist.values()))]
+for i in range(3):
+	index = dist.keys()[dist.values().index(min(dist.values()))]
 	subprocess.call(["mv", "../model/model/model_weights_"+str(index)+".h5",path_save_model+"/model_weights_"+str(index)+".h5"])
 	dist.pop(index)

@@ -120,3 +120,58 @@ def expansion(boundingBoxes):
 				for ok in pickx:
 					bigRect.append([x1[ok],y1[ok],x2[ok],y2[ok]])
 	return bigRect
+
+def readtxt(filename):
+    path = '/home/cad/location.txt'
+    list=[]
+
+    for line in open(path):
+        name = line.split(':')[0]
+        if name == filename:
+            location = line.split(':')[1].split(' ')
+            for i in range(location.__len__()):
+                point = []
+                for j in range(4):
+                    point.append(int(location[i].split(',')[j]))
+                list.append(point)
+    if len(list) == 0:
+        return []
+    else:
+        images = [(np.array(list))]
+        return images[0]
+
+def judge(pick,pick_src,overlap):
+    if len(pick)==0 or len(pick_src)==0:
+        return []
+    index = []
+
+    x1 = pick[:,0]
+    y1 = pick[:,1]
+    x2 = pick[:,2]
+    y2 = pick[:,3]
+
+    src_x1 = pick_src[:,0]
+    src_y1 = pick_src[:,1]
+    src_x2 = pick_src[:,2]
+    src_y2 = pick_src[:,3]
+
+    area1 = (x2 - x1) * (y2 - y1)
+    area2 = (src_x2 - src_x1) * (src_y2 - src_y1)
+
+    for i in range(len(pick)):
+        for j in range(len(pick_src)):
+            endx = max(x2[i],src_x2[j])
+            startx = min(x1[i],src_x1[j])
+            width = (x2[i] - x1[i]) + (src_x2[j] - src_x1[j]) - (endx - startx)
+
+            endy = max(y2[i],src_y2[j])
+            starty = min(y1[i],src_y1[j])
+            height = (y2[i] - y1[i]) + (src_y2[j] - src_y1[j]) - (endy - starty)
+
+            if width <= 0 or height <= 0:
+                continue
+            area = width * height
+            if float(area)/area2[j] > overlap or float(area)/area1[i] > overlap:
+                index.append(i)
+                break
+    return pick[index]

@@ -1,6 +1,7 @@
 # import the necessary packages
 import numpy as np
 import cv2
+from PIL import Image,ExifTags
 
 def translate(image, x, y):
 	# define the translation matrix and perform the translation
@@ -92,3 +93,24 @@ def opencv2matplotlib(image):
 	# expects the image in RGB order, so simply convert from BGR
 	# to RGB and return
 	return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+def exifrotate(filepath):
+    try:
+        image=Image.open(filepath)
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation]=='Orientation':
+                break
+        exif=dict(image._getexif().items())
+
+        if exif[orientation] == 3:
+            image=image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image=image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image=image.rotate(90, expand=True)
+        image.save(filepath)
+        image.close()
+
+    except (AttributeError, KeyError, IndexError):
+        # cases: image don't have getexif
+        pass
