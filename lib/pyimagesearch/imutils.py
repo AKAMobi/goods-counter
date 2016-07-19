@@ -27,7 +27,7 @@ def rotate(image, angle, center=None, scale=1.0):
 	# return the rotated image
 	return rotated
 
-def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+def resize(image, width=None, height=None, inter=cv2.INTER_CUBIC):
 	# initialize the dimensions of the image to be resized and
 	# grab the image size
 	dim = None
