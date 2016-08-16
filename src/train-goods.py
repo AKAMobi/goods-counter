@@ -151,7 +151,7 @@ for i in range(nb_loop):
     #verbose: verbosity mode.
     #mode: one of {auto, min, max}. In 'min' mode, training will stop when the quantity monitored has stopped decreasing; in 'max' mode it will stop when the quantity monitored has stopped increasing.
     earlyStopping= EarlyStopping(monitor='val_loss', patience=5, verbose=1, mode='auto')
-    checkpointer = ModelCheckpoint(filepath="../model/model/model_weights_"+str(i)+".h5", verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath="../model/model_weights_"+str(i)+".h5", verbose=1, save_best_only=True)
 #    class_weight = {0:1,1:5} 
     #调用fit方法
     #shuffle=True，数据经过随机打乱
