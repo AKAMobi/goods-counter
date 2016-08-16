@@ -12,7 +12,7 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.regularizers import l2, activity_l2
 from keras.layers.advanced_activations import PReLU
-from data_train_valid_01 import load_data
+from data import load_data
 import h5py
 import argparse
 from keras.models import model_from_json
