@@ -62,5 +62,3 @@ target/
 
 *.swp
 
-# Neural Network Modules
-model
