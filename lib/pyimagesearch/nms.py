@@ -52,12 +52,17 @@ def non_max_suppression_slow(boxes, overlapThresh):
 
 			# compute the ratio of overlap between the computed
 			# bounding box and the bounding box in the area list
-			overlap = float(w * h) / area[j]
-
+			overlap1 = float(w * h) / area[j]
+			overlap2 = float(w * h) / area[i]
+			#IoU = float(w * h) / (area[i] + area[j] - w * h)
+			y_midpoint_distance = abs((y1[i]+y2[i])/2. - (y1[j]+y2[j])/2.)
+			yi_height = y2[i] - y1[i]
 			# if there is sufficient overlap, suppress the
 			# current bounding box
-			if overlap > overlapThresh:
-				suppress.append(pos)
+			if (y_midpoint_distance < 5*yi_height/18. and (overlap1 > 0.5 or overlap2 > 0.5)) or \
+				(5*yi_height/18.< y_midpoint_distance < yi_height/2. and (overlap1 > 0.4 or overlap2 > 0.4)) or \
+				(y_midpoint_distance > yi_height/2. and (overlap1 > 0.3 or overlap2 > 0.3)):
+					suppress.append(pos)
 
 		# delete all indexes from the index list that are in the
 		# suppression list
@@ -172,7 +177,7 @@ def expansion(boundingBoxes):
 						break
 			pick_sort = np.delete(pick_sort, index)
 
-			if len(pickx) >= 5:
+			if len(pickx) >= 4:
 				for ok in pickx:
 					bigRect.append([x1[ok],y1[ok],x2[ok],y2[ok]])
 	return bigRect

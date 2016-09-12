@@ -2,7 +2,7 @@ import sys
 import os
 if not "/home/cad/git/goods-counter/lib/pyimagesearch/" in sys.path:
 	sys.path.append("/home/cad/git/goods-counter/lib/pyimagesearch/")
-from nms import non_max_suppression_fast,expansion,judge,readtxt
+from nms import non_max_suppression_slow,expansion,judge,readtxt
 from helpers import sliding_window
 from imutils import resize,exifrotate
 import argparse
@@ -23,10 +23,10 @@ files = os.listdir(path)
 #load model
 #model2 = model_from_json(open('/home/cad/model/model_architecture.json').read())
 #model2.load_weights('/home/cad/model/model_weights_8.h5')
-#model = model_from_json(open('/home/cad/cnnmodel/pinkall/model1/model_architecture.json').read())
-#model.load_weights('/home/cad/cnnmodel/pinkall/model1/model_weights_55.h5')
-model = model_from_json(open('/home/cad/model/model_architecture.json').read())
-model.load_weights('/home/cad/model/model_weights_7.h5')
+model = model_from_json(open('/home/cad/cnnmodel/yellow/model0/model_architecture.json').read())
+model.load_weights('/home/cad/cnnmodel/yellow/model0/model_weights_69.h5')
+#model = model_from_json(open('/home/cad/model/model_architecture.json').read())
+#model.load_weights('/home/cad/model/model_weights_4.h5')
 
 #set parameters
 scale = 1.15
@@ -78,8 +78,9 @@ for filename in files:
 			#	if result2[0][1] > 0.99:
 				# detect_list.append([x,y,x+winW,y+winH])
 					list_tmp.append([x,y,x+winW,y+winH])
-			#		cv2.imwrite('/home/cad/dataset/images/valid/'+filename.split('.')[0]+'_'+str(detect_num)+'.png',window_resize)
-			#		detect_num += 1
+					#cv2.imwrite('/home/cad/dataset/images/valid/'+filename.split('.')[0]+'_'+str(detect_num)+'.png',window_resize)
+					#detect_num += 1
+		
 		print(len(list_tmp))
 		if len(list_tmp) < 8 and winW > 41:
 			break
@@ -87,7 +88,7 @@ for filename in files:
                         detect_list.append(list_tmp[idx])
 		winW = int(winW * scale)
 		winH = 2 * winW
-
+	
 	if len(detect_list) > 0:
 		#save initial detect result
 		img = image.copy()
@@ -108,7 +109,7 @@ for filename in files:
 		#Apply non-maximum Suppression and save the final result
 		boundingBoxes = np.array(detect_list)
 		print "[x] after applying expansion, %d bounding boxes" % (len(boundingBoxes))
-		pick = non_max_suppression_fast(boundingBoxes, 0.43)
+		pick = non_max_suppression_slow(boundingBoxes, 0.5)
 		print "[x] after applying non-maximum, %d bounding boxes" % (len(pick))
 	
 		pick_src = readtxt(path='/home/cad/dataset/images/location.txt',filename = filename)
@@ -139,4 +140,5 @@ for filename in files:
 		print "TN = %d" % (len(pick_src))
 		print "accuracy = %s" % (0)
 		print "error = %s" % (0)
+
 cv2.waitKey(0)

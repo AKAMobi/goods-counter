@@ -12,7 +12,7 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.regularizers import l2, activity_l2
 from keras.layers.advanced_activations import PReLU
-from data import load_data
+from data_multi_classes import load_data
 import h5py
 import argparse
 from keras.models import model_from_json
@@ -27,11 +27,11 @@ from keras.models import model_from_json
 #Number of samples per gradient update
 batch_size = 100
 #分类个数
-nb_classes = 2
+nb_classes = 3
 #the number of times to iterate over the training data arrays
 nb_epoch = 50
 #训练CNN的个数
-nb_loop = 100
+nb_loop = 10
 
 # input image dimensions
 img_rows, img_cols = 64, 32
@@ -51,24 +51,15 @@ path_valid = args["valid"]
 path_test = args["test"]
 path_0 = args["0"]
 '''
-#path_train='/home/cad/dataset/middlepink/data/train'
-#path_valid='/home/cad/dataset/middlepink/data/valid_test_1'
-#path_train_0='/home/cad/dataset/middlepink/train_negative'
-#path_valid_0='/home/cad/dataset/middlepink/data/valid_test_0'
+#path_train_1='/home/cad/dataset/pinkall/train_1'
+#path_valid_1='/home/cad/dataset/pinkall/valid_test_1'
+#path_train_2='/home/cad/dataset/bigyellow/train_1'
+#path_valid_2='/home/cad/dataset/bigyellow/valid_test_1'
+#path_train_0='/home/cad/dataset/negative/pink_yellow_158'
+#path_valid_0='/home/cad/dataset/bigyellow/valid_test_0'
 
-#pink
-#path_train='/home/cad/dataset/pinkall/train_1'
-#path_valid='/home/cad/dataset/pinkall/valid_test_1'
-#path_train_0='/home/cad/dataset/pinkall/train_0'
-#path_valid_0='/home/cad/dataset/pinkall/valid_test_0'
-
-#yellow
-path_train='/home/cad/dataset/bigyellow/train_1'
-path_valid='/home/cad/dataset/bigyellow/valid_test_1'
-path_train_0='/home/cad/dataset/bigyellow/train_0'
-path_valid_0='/home/cad/dataset/bigyellow/valid_test_0'
-
-X_train,Y_train_label,X_valid,Y_valid_label = load_data(path_train,path_valid,path_train_0,path_valid_0)
+data_path = '/home/cad/dataset_new'
+X_train,Y_train_label,X_valid,Y_valid_label = load_data(data_path)
 print(X_train.shape[0], 'training samples')
 print(X_valid.shape[0],'validation samples')
 #print(X_test.shape[0],'testing samples')
@@ -121,7 +112,7 @@ for i in range(nb_loop):
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
-    #Softmax回归，输出2个类别
+    #Softmax回归，输出nb_classes个类别
     model.add(Dense(nb_classes))
     model.add(Activation('softmax'))
 
@@ -134,7 +125,7 @@ for i in range(nb_loop):
     #decay: float >= 0. Learning rate decay over each update.
     #nesterov: boolean. Whether to apply Nesterov momentum.
     #model.compile里的参数loss就是损失函数(目标函数),binary_crossentropy即为logistic loss
-    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.004, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     #this will do preprocessing and realtime data augmentation
@@ -176,40 +167,45 @@ for i in range(nb_loop):
 			callbacks=[checkpointer,earlyStopping])
     '''
     #load the best model
-    #model = model_from_json(open('../model/model/model_architecture_1.json').read())
     model.load_weights('../model/model/model_weights_'+str(i)+'.h5')
+
 
     score = model.evaluate(X_train, Y_train, verbose=1)
     print('Train loss:', score[0])
     print('Train accuracy:', score[1])
-    
     count = 0
     result = model.predict(X_train, batch_size=100, verbose = 0)
     for j in range(X_train.shape[0]):
-        if Y_train_label[j] == 1 and result[j][1] > 0.99:
-            count += 1
-        elif Y_train_label[j] == 0 and result[j][1] <= 0.99:
-            count += 1
+	for label in range(nb_classes):
+	    if label == 0:
+		if Y_train_label[j] == 0 and result[j][0] > 0.01:
+			count += 1
+	    else:
+            	if Y_train_label[j] == label and result[j][label] > 0.99:
+                	count += 1
     print(('Strict Train accuracy:', float(count)/X_train.shape[0]))
-    
+
+
     score = model.evaluate(X_valid, Y_valid, verbose=1)
     print('Validation loss:', score[0])
     print('Validation accuracy:', score[1])
-    
     count = 0
     result = model.predict(X_valid, batch_size=100, verbose = 0)
     for j in range(X_valid.shape[0]):
-        if Y_valid_label[j] == 1 and result[j][1] > 0.99:
-            count += 1
-        elif Y_valid_label[j] == 0 and result[j][1] <= 0.99:
-            count += 1
+	for label in range(nb_classes):
+	    if label == 0:
+		if Y_valid_label[j] == 0 and result[j][0] > 0.01:
+            		count += 1
+            else:
+	    	if Y_valid_label[j] == label and result[j][label] > 0.99:
+            		count += 1
     print(('Strict Validation accuracy:', float(count)/X_valid.shape[0]))
+
     
     '''
     score = model.evaluate(X_test, Y_test, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-
     count = 0
     result = model.predict(X_test, batch_size=100, verbose = 0)
     for j in range(X_test.shape[0]):
@@ -219,7 +215,7 @@ for i in range(nb_loop):
             count += 1
     print(('Strict Test accuracy:', float(count)/X_test.shape[0]))
     '''
-#    dist[i]=score[1]
+#    dist[i]=score[0]
     dist[i]=float(count)/X_valid.shape[0]
 
 ######################################
